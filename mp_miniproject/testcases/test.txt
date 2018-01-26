@@ -1,0 +1,60 @@
+
+
+/bin/ls
+ls
+    ls
+   ls
+ls
+non-exist
+/non-exist
+    a\ \ a
+   cd
+   export
+  |
+  <
+  >
+  2>
+  $
+  $$$$$$
+$$$$$$$$
+  cat$$$$$$$$$PATH$$PATH
+  $PATH$$$non-exist
+   cat a\  \ b    \ \    \ c\ c   \d\d  e\ \ e   \ \ f
+   \    cat a\  \ b    \ \    \ c\ c   \d\d  e\ \ e   \ \ f
+   \ cat a\  \ b    \ \    \ c\ c   \d\d  e\ \ e   \ \ f
+cd  \ cat a\  \ b    \ \    \ c\ c   \d\d  e\ \ e   \ \ f
+  cd  \ cat
+  cd ..
+  pwd
+  cd /home/zj32/ece551/mp_miniproject
+ pwd
+ cd ..
+./a.out \n
+set &123 123
+set var0 0
+var0=$var0
+set PATH PATH0
+PATH=$PATH
+ls
+set PATH =/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/zj32/ece551/mp_miniproject
+env
+myShell
+export var0
+env
+ls -a
+cat README commandShell.txt
+cat < non-exist
+ cat < testcases/input1.txt
+  cat -n < testcases/input1.txt
+  cat non-exist 2> testcases/err1.txt > testcases/out1.txt
+  cat -n < testcases/input1.txt 2> testcases/err1.txt > testcases/out1.txt
+  cat > /non-exist
+  cat 2> /non-exist\n
+  ls -lh | cat -n | sort
+  ls |
+  ls > output.txt | cat
+  ls | cat < input1.txt
+  cat < testcases/input1.txt | cat -n 2> err2.txt | sort 2> err3.txt > out3.txt
+exit
+
+

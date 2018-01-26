@@ -1,0 +1,538 @@
+Note:
+     1.cd and set and export and pipe can be done at the same time.
+       commands like "cd ..| ls","ls | cd .." will be considered illegal.
+     2.when set a exist variable, it will change the current variable.
+     3.when set a exist environment variable, it will change the current env variable.
+     4.multiple $ like "$$$$$$$" will be considered as a single "$".
+     5.a single "$" will be considered illegal.
+     5.myShell will take the last redirection.
+       e.g. commands "ls > out.1 -s > out.2" is legal, but myShell will ignore out.1 and create
+       out.2.
+     6.pipe and redirection symbol "|" and "<", ">", "2>" must be devided by space.
+       commands like "ls|cat" can't be parsed as pipe. It should be "ls | cat".
+     7.because the pipe and redirection can be confilcted with each others,
+       if the pipe is created, only the first program can take the ">" redirection,
+       and the last program can take the ">" redirection.
+       e.g. "ls | cat < input.txt | cat" is illegal.
+     8.myShell will show the number of program it exit during pipe.
+       e.g. it will show :"Program0 exited with status 0"
+                          "Program1 exited with status 0"
+			  "Program2 exited with status 0"
+	    if there if only one program, it will only show "Program0 exited with status 0"
+     9.copy constructor and assign operator and destructor are tested in the main funcion.
+     10. some of the test stdin are in testcases/test.txt
+
+Test:
+     First run "valgrind ./myShell\n" to start
+       you will see it print myShell:/home/zj32/ece551/mp_miniproject$, which is correct
+       because it entered myShell and print the current directory.
+       
+       1.test for no argument(including the command itself)
+       	 1) run "\n"
+	    you will see it print myShell:/home/zj32/ece551/mp_miniproject$, which is correct
+	    because by enter "\n", myShell did nothing and restart to get command.
+	    
+	 2) run "            \n"
+	    you will see it print myShell:/home/zj32/ece551/mp_miniproject$, which is correct
+	    because myShell ignore all the space and repeat.
+
+         3) run "cat\EOF"
+	    you will see it print exit myshell, and valgrind is clean, and quit, which is correct
+	    because by enter EOF (C^D) it quit myShell with clean valgrind.( then run valgrind ./myShell\n to restart)
+
+
+       2.test for single argument(one command)
+	 1) run "exit\n"
+	    you will see it print exit myshell, and valgrind is clean, and quit, which is correct
+	    because by typing exit it quit myShell with clean valgrind.( then run valgrind ./myShell\n to restart)
+	    
+         2) run "/bin/ls\n"
+	    you will see it print
+	    "buffer.cpp  commandShell.txt  Makefile  myShell  myShell.cpp  myShell.h  myShell.o  numerics.txt  output.txt  README  #README#  testcases  #TESTING.txt#  TESTING.txt
+	    Program0 exited with status 0
+	    myShell:/home/zj32/ece551/mp_miniproject$"
+	    which is correct because myShell execute /bin/ls and print the exit status and return to get the next command.
+	    
+	 3) run "ls\n"
+	    you will see the same result as 2) which is correct because myShell find the ls in "PATH" envrionment variable
+	    and execute and return to get the next command
+	    
+	 4) 5) 6) run "    ls\n" or "ls    \n" or "   ls   \n"
+	    you will see the same result as 2) which is correct because myShell skip all the space and execute the command
+	    and return to get the nest command.
+	    
+	 7) run "non-exist\n"
+	    you will see it print
+	    "Command non-exist not found
+	     myShell:/home/zj32/ece551/mp_miniproject" which is correct because myShell can't find non-exist and then return
+	     to get the next command.
+	     
+	 8) run "/non-exist\n"
+	    you will see it print
+	    "Command /non-exist not found
+	     myShell:/home/zj32/ece551/mp_miniproject" which is correct because myShell can't find /non-exist and then return
+	     to get the next command.
+
+         9) run "    a\ \ a    \n"
+	    you will see it print
+	    "Command a  b not found
+	     myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell parse the "\ " and
+	     fail to find "a  b" and then return to get the next command.
+
+         10) run " cd \n"
+	     you will see it print
+	     "cd: to change directory
+	      myShell:/home/zj32/ece551/mp_miniproject$ " which is correct because myShell get cd and find the sytax is illegal
+	      and remind the user and return to get the next command.
+
+         11) run " set \n"
+	     you will see it print
+	     "format should be:"set var value"
+	      myShell:/home/zj32/ece551/mp_miniproject$ " which is correct because myShell get set and find the sytax is illegal
+	      and remind the user and return to get the next command.
+	      
+         12) run " export \n"
+	     you will see it print
+	     "format should be:"export var"
+	      myShell:/home/zj32/ece551/mp_miniproject$ " which is correct because myShell get export and find the sytax is illegal
+	      and remind the user and return to get the next command.
+
+         13) run "   |   \n"
+	     you will see it print
+	     "pipe error: format.
+	      myShell:/home/zj32/ece551/mp_miniproject$ " which is correct because myShell get a pipe and find the sytax is illegal
+	      and remind the user and return to get the next command.
+
+         14) 15) 16) run "  <   \n",  "  >   \n",  "  2>   \n"
+	     you will see it print
+	     "Command <(or > or 2>) not found
+	      myShell:/home/zj32/ece551/mp_miniproject$ " which is correct because myShell get invalid redirection instruction
+	      and find the sytax is illegal and remind the user and return to get the next command.
+
+	 17) run " $\n"
+	     you will see it print
+	     ""$" must be followed by argument
+	      myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell get invalid $ and remind the user,
+	      and return to get the next command.
+
+	 18) run "   $$$$\n"
+	     you will see it print
+	     ""$" must be followed by argument
+	      myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell skip all the space
+	      and get invalid $ and remind the user, and return to get the next command.
+
+         19) run "   $$$$$$$$$$$$      \n"
+	     you will see it print
+	     ""$" must be followed by argument
+	      myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell skip all the space
+	      and get invalid $ and remind the user, and return to get the next command.
+	 
+	 20) run "$$$$$$$$$      \n"
+	     you will see it print
+	     ""$" must be followed by argument
+	      myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell skip all the space
+	      and get invalid $ and remind the user, and return to get the next command.
+	     
+	 21) 22) 23) 24) run "$PATH" or "$$PATH    \n" or "    $$$PATH\n" or "  $$PATH$$$  \n"
+	     you will see it print
+	     "Command /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games not found
+	      myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell skip all the space and useless $
+	      and get the variable PATH and then find it not a command, and return to get the next command.
+
+	 25) run "   $$$non-exist      \n"
+	     you will see it print
+	     "variable:non-exist not found
+	     myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell skip all the space and useless $
+	      and try to find non-exist variable and failed remind the user, and return to get the next command.
+
+         26) run "  cat$$$$$$$$$PATH$$PATH      \n"
+	     you will see it print
+	     "Command cat/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games not found
+	     myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell skip all the space and useless $
+	      and get the variable and put them to gether and remind the user it's not a command, and return to get the next command.
+
+	 27) run "  $$PATH$$$non-exist \n"
+	     you will see it print
+	     "variable:non-exist not found
+	     myShell:/home/zj32/ece551/mp_miniproject$" which is correct because myShell skip all the space and valid variable
+	     and useless $ and try to find non-exist variable and failed remind the user, and return to get the next command.
+
+	 28) run "exit\n"
+	     you will see it print exit myshell and valgrind information which is clean. which is correct
+	     (then run valgrind ./myShell again to do the following test)
+
+
+       3.test for more than one argument
+       3.0 parse connercase command and arguments
+         1) run "   cat a\  \ b    \ \    \ c\ c   \d\d  e\ \ e   \ \ f       \n"
+	    you will see it print
+	    "/bin/cat: 'a ': No such file or directory
+	     /bin/cat: ' b': No such file or directory
+	     /bin/cat: '  ': No such file or directory
+	     /bin/cat: ' c c': No such file or directory
+	     /bin/cat: '\d\d': No such file or directory
+	     /bin/cat: 'e  e': No such file or directory
+	     /bin/cat: '  f': No such file or directory
+	     Program0 exited with status 1
+	     myShell:/home/zj32/ece551/mp_miniproject$"
+	     which is correct, because myShell find cat command and execute and passing all the argument to the cat
+	     and each argument contain one or more"\","\ " and more than one space are in between and myShell parse them correctly.
+	     then cat can't find any of them, so it return error information and myShell said it exit with status 1.
+	     
+	  2) run"\    cat a\  \ b    \ \    \ c\ c   \d\d  e\ \ e   \ \ f       \n"
+	     you will see it print
+	     "Command   not found
+	      myShell:/home/zj32/ece551/mp_miniproject$"
+	     which is correct. because myShell find the first argument is " " and can't find it, can repeat.
+
+          3) run"  \ cat a\  \ b    \ \    \ c\ c   \d\d  e\ \ e   \ \ f       \n"
+	     you will see it print
+	     "Command  cat not found
+	      myShell:/home/zj32/ece551/mp_miniproject$"
+	     which is correct. because myShell find the first argument is " cat" and can't find it, can repeat.
+	     
+       3.1 cd command
+       	  4) run" cd  \ cat a\  \ b    \ \    \ c\ c   \d\d  e\ \ e   \ \ f \n"
+	     you will see it print
+	     "cd: to change directory
+	      myShell:/home/zj32/ece551/mp_miniproject$"
+	     which is correcot because myShell find the arguement number is not correct and print error information and repeat.
+
+	  5) run "  cd  \ cat \n"
+	     you will see it print
+	     "cd: No such file or directory
+	      myShell:/home/zj32/ece551/mp_miniproject$"
+	     which is correcot because myShell find the arguement " cat" is not correct and print error information and repeat.
+
+	  6) run "  cd ..  \n  pwd  \n"
+	     you will see it print
+	     "myShell:/home/zj32/ece551$   pwd
+	      /home/zj32/ece551
+	      Program0 exited with status 0
+	      myShell:/home/zj32/ece551$"
+	     which is correcot because myShell change to .. and show the current dir, and then execute pwd and shows the
+	     right path.
+
+	  7) run "cd /home/zj32/ece551/mp_miniproject\n pwd\n"
+	     you will see it print
+	     "myShell:/home/zj32/ece551$ cd /home/zj32/ece551/mp_miniproject
+	     myShell:/home/zj32/ece551/mp_miniproject$ pwd
+	     /home/zj32/ece551/mp_miniproject
+	     Program0 exited with status 0
+	     myShell:/home/zj32/ece551/mp_miniproject$"
+	    which is correcot because myShell change by the absolute path and show the current dir, and then execute pwd and shows the
+	    right path.
+
+	  8) then run"  cd .. \n ./a.out \n" (a.out is my program)
+	     you will see it print
+	     "myShell:/home/zj32/ece551$ ./a.out
+	     0: apples
+	     1: bread
+	     2: cake
+	     3: diced peaches
+	     4: eggplant
+	     5: french fries
+	     6: grapes
+	     7: zucchini
+	     Program0 exited with status 0
+	     myShell:/home/zj32/ece551$"
+	     which is correct, because myShell change directory and and find the program in the current directroy.
+	     (then run "cd /home/zj32/ece551/mp_miniproject\n" to get back)
+
+       3.2 set command
+          9) then run"set &123 123\n"
+	     variable can only contains letters, underscores or numbers.
+	     myShell:/home/zj32/ece551/mp_miniproject$
+	     "which is correct, because variable can't contain symbol like "&".
+
+	  9) then run"set var0 0\n   var0=$var0   \n"
+	     you will see it print"
+	     myShell:/home/zj32/ece551/mp_miniproject$ set var0 0
+	     set:$var0=0
+	     myShell:/home/zj32/ece551/mp_miniproject$ var0=$var0
+	     Command var0=0 not found
+	     myShell:/home/zj32/ece551/mp_miniproject$
+	     "which is correct, because var0 is set to 0 and give user the info, and when $var0 is meet, myShell change it to 0,
+	     and the second command "var0=$var0" change to "var0=0" which can't be found, and Shell repeat.
+
+	  10)then run"set var0    1   \n   var0=$var0   \n"
+	     you will see it print"
+	     myShell:/home/zj32/ece551/mp_miniproject$ set var0 0
+	     set:$var0=   1   
+	     myShell:/home/zj32/ece551/mp_miniproject$ var0=$var0
+	     Command var0=   1    not found
+	     myShell:/home/zj32/ece551/mp_miniproject$
+	     "which is correct, because var0 is change to "   1   " and give user the info, and when $var0 is meet, myShell change it to 0,
+	     and the second command "var0=$var0" change to "var0=   1   " which can't be found, and Shell repeat. all the space are
+	     parsed correctly
+
+	  11)then run"set PATH PATH0 \n   PATH=$PATH   \n   ls   \n"
+	     you will see it print"
+	     set:$PATH=PATH0
+	     myShell:/home/zj32/ece551/mp_miniproject$ PATH=$PATH
+	     Command PATH=PATH0 not found
+	     myShell:/home/zj32/ece551/mp_miniproject$    ls
+	     Command ls not found
+	     myShell:/home/zj32/ece551/mp_miniproject$
+	     "which is correct, because PATH is change to "PATH0 " and give user the info, and when $PATH is meet, myShell change it to PATH0,
+	     "PATH=PATH0" can't be found, and Shell repeat. then when do "ls" the shell can't find it because now PATH is change to "PATH0  "
+	     and "PATH0  /ls" dose not exist.
+
+	  12)then run" set PATH =/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/zj32/ece551/mp_miniproject\n
+	  	       env\n myShell\n exit\n"
+	     you will see it print"
+	     myShell:/home/zj32/ece551/mp_miniproject$ env
+	     EDITOR=emacs -nw
+	     GLIBCPP_FORCE_NEW=1
+	     GLIBCXX_FORCE_NEW=1
+	     HOME=/home/zj32
+	     LANG=en_US.UTF-8
+	     LD_LIBRARY_PATH=/usr/lib/debug
+	     LD_PRELOAD=
+	     LESSCLOSE=/usr/bin/lesspipe %s %s
+	     LESSOPEN=| /usr/bin/lesspipe %s
+	     LOGNAME=zj32
+	     LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+	     MAIL=/var/mail/zj32
+	     OLDPWD=/home/zj32
+	     PATH==/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/zj32/ece551/mp_miniproject
+	     PWD=/home/zj32/ece551/mp_miniproject
+	     SHELL=/bin/bash
+	     SHLVL=1
+	     SSH_CLIENT=174.99.42.118 57996 22
+	     SSH_CONNECTION=174.99.42.118 57996 152.3.77.223 22
+	     SSH_TTY=/dev/pts/99
+	     TERM=xterm
+	     USER=zj32
+	     VISUAL=emacs -nw
+	     XDG_RUNTIME_DIR=/run/user/1057
+	     XDG_SESSION_ID=32611
+	     _=/usr/bin/valgrind
+	     Program0 exited with status 0
+	     myShell:/home/zj32/ece551/mp_miniproject$ myShell
+	     myShell:/home/zj32/ece551/mp_miniproject$ exit
+             exit myshell
+             Program0 exited with status 0
+             "which is correct, because PATH0 is change to "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/zj32/ece551/mp_miniproject"
+	     and give user the info, and now env command can be found, and when execute, we found that PATH in env program change to new one. an you will see that
+	     var0 is not added to the new environment variables because we didn't export it
+	     and myShell can also be execute because we add /home/zj32/ece551/mp_miniproject to PATH, myShell will find myShell in the new PATH.then exit the child shell.
+
+       3.3 export command
+	  13)then run" export var0\n env\n"
+	     you will see it print"
+	     export:$var0=   1   as environment variable
+	     myShell:/home/zj32/ece551/mp_miniproject$ env
+	     EDITOR=emacs -nw
+	     GLIBCPP_FORCE_NEW=1
+	     GLIBCXX_FORCE_NEW=1
+	     HOME=/home/zj32
+	     LANG=en_US.UTF-8
+	     LD_LIBRARY_PATH=/usr/lib/debug
+	     LD_PRELOAD=
+	     LESSCLOSE=/usr/bin/lesspipe %s %s
+	     LESSOPEN=| /usr/bin/lesspipe %s
+	     LOGNAME=zj32
+	     LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+	     MAIL=/var/mail/zj32
+	     OLDPWD=/home/zj32
+	     PATH==/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/zj32/ece551/mp_miniproject
+	     PWD=/home/zj32/ece551/mp_miniproject
+	     SHELL=/bin/bash
+	     SHLVL=1
+	     SSH_CLIENT=174.99.42.118 57996 22
+	     SSH_CONNECTION=174.99.42.118 57996 152.3.77.223 22
+	     SSH_TTY=/dev/pts/99
+	     TERM=xterm
+	     USER=zj32
+	     VISUAL=emacs -nw
+	     XDG_RUNTIME_DIR=/run/user/1057
+	     XDG_SESSION_ID=32611
+	     _=/usr/bin/valgrind
+	     var0=   1
+	     Program0 exited with status 0
+	     myShell:/home/zj32/ece551/mp_miniproject$	     
+             "which is correct, because now var0 is set to be environment variables and now when do env, the var0 can be shown.
+
+       3.4 execute command which take argument
+      	  14)then run" ls -a\n"
+	     you will see it print"
+	     .   buffer.cpp  commandShell.txt  Makefile  myShell.cpp  myShell.o     output.txt  testcases      #TESTING.txt#  TESTING.txt~
+	     ..  cat.1       .honor            myShell   myShell.h    numerics.txt  README      .#TESTING.txt  TESTING.txt
+	     Program0 exited with status 0
+	     "which is correct, because myShell execute ls with the argument -a. and repeat.
+
+      	  15)then run" cat README commandShell.txt\n"
+	     you will see it print the contents of both README and commandShell.txt
+	     which is correct, because myShell execute cat with two. and repeat.
+	     
+      	  16)then run"cat\n0\n1\n2\n3\n4\nC^D"
+	     you will see it print"
+	     0
+	     0
+	     1
+	     1
+	     2
+	     2
+	     3
+	     3
+	     4
+	     4
+	     Program0 exited with status 0
+	     myShell:/home/zj32/ece551/mp_miniproject$
+	     "which is correct, because myShell execute cat with no argument and take the stdin.
+	     
+       3.5 do redirection
+       	  17) then run"cat < non-exist\n"
+	      you will see it print"
+	      Can't read "non-exist"
+	      myShell:/home/zj32/ece551/mp_miniproject$
+	      "which is correct because myShell check the input path and found it not valid and inform user and repeat.
+
+          18) then run" cat < testcases/input1.txt"
+	      you will see it print"
+	      0
+	      1
+	      2
+	      3
+	      Program0 exited with status 0
+	      myShell:/home/zj32/ece551/mp_miniproject$
+	      "which is correct, because myShell find the input and do redireciton and execute.
+
+          19) then run" cat < testcases/input1.txt"
+	      you will see it print"
+                    1  0
+          	    2  1
+	       	    3  2
+	            4  3
+		    Program0 exited with status 0
+		    myShell:/home/zj32/ece551/mp_miniproject$
+	      "which is correct, because myShell find the input and do redireciton and ignore redireciton argument
+	      and take the -s argument and then execute.
+
+	   20) then run" cat non-exist 2> testcases/err1.txt > testcases/out1.txt"
+	       you will see it print"
+	       Program0 exited with status 1
+	       myShell:/home/zj32/ece551/mp_miniproject$
+	       "which and err1.txt and out1.txt is created in the testcases and err is in err1.txt.
+
+	   21) then run "cat -n < testcases/input1.txt 2> testcases/err1.txt > testcases/out1.txt"
+	       you will see it print"
+	       Program0 exited with status 0
+	       myShell:/home/zj32/ece551/mp_miniproject$
+	       "which is correct because it take input1.txt overwrite err1.txt and put the output in out1.txt
+
+	   22) then run"cat > /non-exist\n"
+	       you will see it print"
+	       Can't open redirection file.
+	       Program0 exited with status 0
+	       myShell:/home/zj32/ece551/mp_miniproject$
+	       "which is correct because myShell can't find the file and exit childprocess.
+
+	   23) then run"cat 2> /non-exist\n" you will see the same.
+
+	   24) then run"cat README > out0.txt > out2.txt\n" you will see"
+	       Program0 exited with status 0
+	       myShell:/home/zj32/ece551/mp_miniproject$
+	       "which is correct and only out2.txt is created.
+
+	   25) then run"cat > > < <" or "cat < >" or "cat < > 2>" you will it print"
+	       redireciton syntax error: should be followed by filename
+	       myShell:/home/zj32/ece551/mp_miniproject$
+	       "whcih is correct because these are all illegal sytax and myShell reconized it.
+	   
+
+       3.6 implement pipes
+       	   27) then run "ls -lh | cat -n | sort\n"
+	   you will see it print"
+	   Program0 exited with status 0
+	   Program1 exited with status 0
+    10	-rw-rw-r-- 1 zj32 zj32 3.5K Dec  2 19:59 myShell.h
+    11	-rw-rw-r-- 1 zj32 zj32 680K Dec  3 10:28 myShell.o
+    12	-rw-rw-r-- 1 zj32 zj32    0 Dec  3 10:21 non-exist
+    13	-rw-rw-r-- 1 zj32 zj32 6.7K Nov  9 22:00 numerics.txt
+    14	-rw-rw-r-- 1 zj32 zj32  821 Dec  2 18:25 output.txt
+    15	-rw-rw-r-- 1 zj32 zj32 2.4K Nov  9 22:00 README
+    16	drwxrwxr-x 2 zj32 zj32   93 Dec  3 10:20 testcases
+    17	-rw-rw-r-- 1 zj32 zj32  25K Dec  3 10:49 #TESTING.txt#
+    18	-rw-rw-r-- 1 zj32 zj32  14K Dec  3 09:25 TESTING.txt
+    19	-rw-rw-r-- 1 zj32 zj32 8.6K Dec  3 00:49 TESTING.txt~
+     1	total 1.2M
+     2	-rw-rw-r-- 1 zj32 zj32    0 Dec  3 10:21 123124
+     3	-rw-rw-r-- 1 zj32 zj32 2.3K Dec  1 21:52 buffer.cpp
+     4	-rw-rw-r-- 1 zj32 zj32  301 Dec  3 08:56 cat.1
+     5	-rw-rw-r-- 1 zj32 zj32 5.6K Nov  9 22:00 commandShell.txt
+     6	-rw-rw-r-- 1 zj32 zj32    0 Dec  3 10:21 lasdkjf
+     7	-rw-rw-r-- 1 zj32 zj32  238 Dec  2 12:09 Makefile
+     8	-rwxrwxr-x 1 zj32 zj32 354K Dec  3 10:28 myShell
+     9	-rw-rw-r-- 1 zj32 zj32  17K Dec  3 10:28 myShell.cpp
+     	Program2 exited with status 0
+	myShell:/home/zj32/ece551/mp_miniproject$
+	"which is correct because it can take arguement and pipe the out put of ls to cat and then to sort
+	and sort print the output.
+
+	   28) then run "ls | cat | |\n"
+	    you will see it print"
+	    pipe error: format.
+	    myShell:/home/zj32/ece551/mp_miniproject$
+	    "which is correct because it finds the input sytax is not correcot ans print the error infomaiton
+
+	   29) then run"ls |\n"you will see the same as 28)
+	    
+       3.7 combine pipes and redirection and argument
+       	   30) then run"ls | cat < input.txt | cat\n" you will see"
+	   Program0 exited with status 0
+	   only the first program can take an input file for redireciton
+	   myShell:/home/zj32/ece551/mp_miniproject$
+	   "which is correct because in the pipe there can't be a redireciton
+
+	   31) then run"ls | cat > output.txt | cat\n" you will see"
+	   Program0 exited with status 0
+	   only the last program can take an output file for redireciton
+	   myShell:/home/zj32/ece551/mp_miniproject$
+	   "which is correct because in the pipe there can't be a redireciton
+
+	   32) then run"ls > output.txt | cat\n" you whil see"
+	   Program0 exited with status 0
+	   only the last program can take an output file for redireciton
+	   myShell:/home/zj32/ece551/mp_miniproject$
+	   "which is correct because it detect the conflict
+
+       	   33) then run"ls | cat < input1.txt\n" you will see"
+	   Program0 exited with status 0
+	   only the first program can take an input file for redireciton
+	   myShell:/home/zj32/ece551/mp_miniproject$
+	   "which is correct because it detect the conflict
+
+	   34) then run "cat < testcases/input1.txt | cat -n 2> err2.txt | sort 2> err3.txt > out3.txt\n cat out3.txt"
+	   you will see"
+	   Program0 exited with status 0
+	   Program1 exited with status 0
+	   Program2 exited with status 0
+	   ==77957==
+	   ==77957== HEAP SUMMARY:
+	   ==77957==     in use at exit: 72,704 bytes in 1 blocks
+	   ==77957==   total heap usage: 17,412 allocs, 17,411 frees, 1,718,329 bytes allocated
+	   ==77957==
+	   ==77957== LEAK SUMMARY:
+	   ==77957==    definitely lost: 0 bytes in 0 blocks
+	   ==77957==    indirectly lost: 0 bytes in 0 blocks
+	   ==77957==      possibly lost: 0 bytes in 0 blocks
+	   ==77957==    still reachable: 0 bytes in 0 blocks
+	   ==77957==         suppressed: 72,704 bytes in 1 blocks
+	   ==77957==
+	   ==77957== For counts of detected and suppressed errors, rerun with: -v
+	   ==77957== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+	   myShell:/home/zj32/ece551/mp_miniproject$ ls
+	   123124      cat.1             err2.txt  lasdkjf   myShell      myShell.h  non-exist     #out1.txt#  out3.txt    README     #TESTING.txt#  TESTING.txt~
+	   buffer.cpp  commandShell.txt  err3.txt  Makefile  myShell.cpp  myShell.o  numerics.txt  out1.txt    output.txt  testcases  TESTING.txt
+	   Program0 exited with status 0
+	   myShell:/home/zj32/ece551/mp_miniproject$ cat out3.txt
+	        				     1  0
+		     				     2  1
+		          			     3  2
+			       			     4  3
+			       Program0 exited with status 0
+			       myShell:/home/zj32/ece551/mp_miniproject$
+           "which is correct because it do the pipe and redirection at the sametime and the out come out3.txt is right too.
+	   
