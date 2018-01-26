@@ -1,0 +1,4 @@
+***Your tests failed to show that rotateMatrix1 was broken!
+Checking rotateMatrix2
+Checking rotateMatrix3
+Checking rotateMatrix4

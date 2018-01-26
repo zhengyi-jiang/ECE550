@@ -1,0 +1,9 @@
+Grading at 09/20/2017:20:51:18.641394
+For commit ID 297dba44ad84a58a3c3768b013ba19b1b4715e8b
+Attempting to compile test.c
+gcc -o test -std=gnu99 test.c
+compiled
+Your file matched the expected output
+Your output matched what we expected
+
+Overall Grade: A
