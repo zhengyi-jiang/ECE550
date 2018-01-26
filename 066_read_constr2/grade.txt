@@ -1,0 +1,8 @@
+Grading at 10/12/2017:00:10:11.275711
+For commit ID fd5deaa761d1fd711f73d76270150c11d7aab90c
+Attempting to compile:
+g++ -std=gnu++98 -o code code.cpp
+Your file matched the expected output
+Your output matched what we expected
+
+Overall Grade: PASSED
